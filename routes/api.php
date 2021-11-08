@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Controllers\Web\IndexController;
+
 $api = app('Dingo\Api\Routing\Router');
 
 $api->version('v1', function ($api) {
-    $api->get('users/{id}', 'App\Api\Controllers\UserController@show');
+    $api->get('index', [IndexController::class, 'index']);
 });
