@@ -1,14 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
 
-use Dingo\Api\Routing\Helpers;
-use Illuminate\Http\Request;
+namespace App\Enum;
 
-class BaseController extends Controller
+
+class StatusCode
 {
-    use Helpers;
-
     const CODE_200 = 200; // 请求成功
     const CODE_201 = 201; // 创建成功
     const CODE_204 = 204; // 删除成功

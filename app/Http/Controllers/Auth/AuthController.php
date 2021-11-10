@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Enum\StatusCode;
 use App\Http\Controllers\BaseController;
 use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\Request;
@@ -16,10 +17,9 @@ class AuthController extends BaseController
     {
         $credentials = $request->only('email', 'password');
         if (!$token = auth('api')->attempt($credentials)) {
-            return $this->response->errorUnauthorized();
+            return $this->response->errorUnauthorized('邮箱或密码错误');
         }
         return $this->respondWithToken($token);
-
     }
 
     /**
@@ -47,9 +47,10 @@ class AuthController extends BaseController
     protected function respondWithToken($token)
     {
         return $this->response->array([
-            'access_token' => $token,
+            'user'     => auth('api')->user(),
+            'access_token' => 'bearer ' . $token,
             'token_type'   => 'bearer',
-            'expires_in'   => auth('api')->factory()->getTTL() * 60
+            'expires_in'   => auth('api')->factory()->getTTL() * 6000000
         ]);
     }
 }
