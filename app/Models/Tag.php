@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Team extends BaseModel
+class Tag extends BaseModel
 {
     protected $guarded = [
         'created_at', 'updated_at'

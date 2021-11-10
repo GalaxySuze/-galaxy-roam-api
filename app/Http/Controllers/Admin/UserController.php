@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\BaseController;
 use App\Http\Requests\Admin\AddUserRequest;
+use App\Http\Requests\Admin\EditUserRequest;
 use App\Models\User;
 use App\Transformers\UserTransformer;
 use Illuminate\Http\Request;
@@ -30,16 +31,13 @@ class UserController extends BaseController
             'username' => $request->get('username'),
             'email'    => $request->get('email'),
             'avatar'   => $request->get('avatar'),
-            'password' => bcrypt($request->get('username')),
+            'password' => bcrypt($request->get('password')),
         ]);
         return $this->response->item($result, new UserTransformer())->setStatusCode(201);
     }
 
     /**
-     * Display the specified resource.
-     *
-     * @param int $id
-     * @return \Illuminate\Http\Response
+     * @param $id
      */
     public function show($id)
     {
@@ -47,15 +45,20 @@ class UserController extends BaseController
     }
 
     /**
-     * Update the specified resource in storage.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @param int $id
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     * @param $id
+     * @return \Dingo\Api\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(EditUserRequest $request, $id)
     {
-        //
+        User::where('id', $id)
+            ->update([
+                'username' => $request->get('username'),
+                'email'    => $request->get('email'),
+                'avatar'   => $request->get('avatar'),
+                'password' => bcrypt($request->get('password')),
+            ]);
+        return $this->response->item(User::find($id), new UserTransformer());
     }
 
     /**
@@ -66,7 +69,8 @@ class UserController extends BaseController
      */
     public function destroy($id)
     {
-        //
+        User::where('id', $id)->delete();
+        return $this->response->noContent()->setStatusCode(200);
     }
 
     /**
@@ -98,7 +102,7 @@ class UserController extends BaseController
         if (!$userInfo) {
             return $this->response->errorNotFound('未查询到该用户信息!');
         }
-        $userInfo->state = (int)$type;
+        $userInfo->state = $type == 'true' ? 1 : 0;
         $userInfo->save();
         return $this->response->item($userInfo, new UserTransformer());
     }
