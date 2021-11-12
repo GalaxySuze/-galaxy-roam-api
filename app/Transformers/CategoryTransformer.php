@@ -16,10 +16,11 @@ class CategoryTransformer extends TransformerAbstract
     public function transform(Category $category): array
     {
         return [
-            'id'    => $category->id,
-            'title' => $category->title,
-            'icon'  => $category->icon,
-            'order' => $category->order,
+            'id'         => $category->id,
+            'title'      => $category->title,
+            'icon'       => $category->icon,
+            'order'      => $category->order,
+            'created_at' => $category->created_at,
         ];
     }
 }

@@ -79,4 +79,13 @@ class TagController extends BaseController
 
         return $this->response->paginator($result, new TagTransformer());
     }
+
+    /**
+     * @return \Dingo\Api\Http\Response
+     */
+    public function getTagData()
+    {
+        $tagData = Tag::all();
+        return $this->response->collection($tagData, new TagTransformer());
+    }
 }

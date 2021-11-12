@@ -7,6 +7,8 @@ use App\Http\Requests\Admin\AddTeamRequest;
 use App\Http\Requests\Admin\AddUserRequest;
 use App\Http\Requests\Admin\EditTeamRequest;
 use App\Http\Requests\Admin\EditUserRequest;
+use App\Models\Category;
+use App\Models\Tag;
 use App\Models\Team;
 use App\Models\User;
 use App\Transformers\TeamTransformer;
@@ -45,10 +47,12 @@ class TeamController extends BaseController
 
     /**
      * @param $id
+     * @return \Dingo\Api\Http\Response
      */
     public function show($id)
     {
-        //
+        $result = Team::find($id);
+        return $this->response->item($result, new TeamTransformer());
     }
 
     /**
@@ -58,10 +62,11 @@ class TeamController extends BaseController
      */
     public function update(EditTeamRequest $request, $id)
     {
+        $tags_id = implode(',', $request->get('tags_id'));
         Team::where('id', $id)
             ->update([
                 'category_id'      => $request->get('category_id'),
-                'tags_id'          => $request->get('tags_id'),
+                'tags_id'          => $tags_id,
                 'name'             => $request->get('name'),
                 'desc'             => $request->get('desc'),
                 'avatar'           => $request->get('avatar'),
@@ -93,14 +98,33 @@ class TeamController extends BaseController
         $categoryId = $request->get('category_id');
         $tagsId = $request->get('tags_id');
         $pageSize = $request->get('pageSize');
-        $result = Team::when(!empty($name), function ($query) use ($name) {
-            $query->where('name', 'like', "%$name%");
-        })->when(!empty($categoryId), function ($query) use ($categoryId) {
-            $query->where('category_id', $categoryId);
-        })->when(!empty($tagsId), function ($query) use ($tagsId) {
-            $query->where('tags_id', 'like', "%$tagsId%");
-        })->orderBy('created_at', 'desc')->paginate($pageSize);
+        $result = Team::leftJoin('categories', 'categories.id', '=', 'teams.category_id')
+            ->when(!empty($name), function ($query) use ($name) {
+                $query->where('name', 'like', "%$name%");
+            })->when(!empty($categoryId), function ($query) use ($categoryId) {
+                $query->where('category_id', $categoryId);
+            })->when(!empty($tagsId), function ($query) use ($tagsId) {
+                $query->where('tags_id', 'like', "%$tagsId%");
+            })->orderBy('created_at', 'desc')
+            ->select([
+                'teams.*',
+                'categories.title as category_name'
+            ])->paginate($pageSize);
 
         return $this->response->paginator($result, new TeamTransformer());
+    }
+
+    /**
+     * @return \Dingo\Api\Http\Response
+     */
+    public function getFormInitData()
+    {
+        $categoryData = Category::get(['id', 'title'])->toArray();
+        $tagData = Tag::get(['id', 'tag'])->toArray();
+        $result = [
+            'category' => $categoryData,
+            'tag'      => $tagData,
+        ];
+        return $this->response->array($result);
     }
 }

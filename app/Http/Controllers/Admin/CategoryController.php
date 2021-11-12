@@ -80,4 +80,13 @@ class CategoryController extends BaseController
 
         return $this->response->paginator($result, new CategoryTransformer());
     }
+
+    /**
+     * @return \Dingo\Api\Http\Response
+     */
+    public function getCategoryData()
+    {
+        $categoryData = Category::all();
+        return $this->response->collection($categoryData, new CategoryTransformer());
+    }
 }
