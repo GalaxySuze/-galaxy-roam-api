@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\SiteController;
 use App\Http\Controllers\Admin\TagController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\MenuController;
@@ -33,10 +34,15 @@ $api->version('v1', ['middleware' => 'api.auth'], function ($api) {
         $api->get('team/list', [TeamController::class, 'list']);
         $api->get('team/form-init-data', [TeamController::class, 'getFormInitData']);
 
+        // 获取站点列表
+        $api->get('site/list', [SiteController::class, 'list']);
+        $api->get('site/form-init-data', [SiteController::class, 'getFormInitData']);
+
         $api->resource('menu', MenuController::class, ['only' => ['store', 'update', 'destroy']]);
         $api->resource('user', UserController::class, ['only' => ['store', 'update', 'destroy']]);
         $api->resource('category', CategoryController::class, ['only' => ['store', 'destroy']]);
         $api->resource('tag', TagController::class, ['only' => ['store', 'destroy']]);
         $api->resource('team', TeamController::class, ['only' => ['store', 'update', 'destroy', 'show']]);
+        $api->resource('site', SiteController::class, ['only' => ['store', 'update', 'destroy', 'show']]);
     });
 });
