@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\BaseController;
 use App\Http\Controllers\Controller;
+use App\Models\Site;
 use App\Models\Tag;
 use App\Models\Team;
 use Illuminate\Http\Request;
@@ -19,18 +20,23 @@ class IndexController extends BaseController
         $this->tagModel = $tag;
     }
 
+    public function index()
+    {
+
+    }
+
     /**
      * @return \Dingo\Api\Http\Response
      */
-    public function index()
+    public function drawClass()
     {
-        // 首页标签数据
+        // 页面标签数据
         $hotTags = $this->tagModel->where('order', '>', 0)
             ->orderBy('order')
             ->get(['id', 'tag', 'order'])
             ->toArray();
 
-        // 首页卡片数据
+        // 页面卡片数据
         $teamsData = [];
         $teamQuery = Team::leftJoin('categories', 'categories.id', '=', 'teams.category_id')
             ->orderByRaw('categories.order, teams.created_at desc')
@@ -48,7 +54,6 @@ class IndexController extends BaseController
             });
         $this->limit = 7;
         $this->handleItems($teamQuery, $teamsData);
-
 
         $data = [
             'hot_tags' => $hotTags,
@@ -157,6 +162,60 @@ class IndexController extends BaseController
 
         $data = [
             'teams' => collect($teamsData)->values(),
+        ];
+
+        return $this->response->array($data);
+    }
+
+    /**
+     * @return \Dingo\Api\Http\Response
+     */
+    public function SiteNav()
+    {
+        $categoryList = $siteList = [];
+        $siteQuery = Site::leftJoin('categories', 'categories.id', '=', 'sites.category_id')
+            ->orderByRaw('categories.order, sites.created_at desc')
+            ->get([
+                'sites.name',
+                'sites.thumb',
+                'sites.url',
+                'sites.desc',
+                'sites.tags_id',
+                'sites.category_id',
+                'categories.title as category_name'
+            ])->groupBy(function ($gv) {
+                return $gv->category_id . '-' . $gv->category_name;
+            });
+
+        $siteQuery->map(function ($v, $categoryKey) use (&$siteList, &$categoryList) {
+            $items = $v->toArray();
+            [$categoryId, $categoryName] = explode('-', $categoryKey);
+            array_push($categoryList, [
+                'category_id'   => $categoryId,
+                'category_name' => $categoryName,
+            ]);
+            $siteList[$categoryId] = [
+                'category_id'   => $categoryId,
+                'category_name' => $categoryName,
+                'items'         => [],
+            ];
+            foreach ($items as $key => $item) {
+                $tagsName = [];
+                if (!empty($item['tags_id'])) {
+                    $tagsId = explode(',', $item['tags_id']);
+                    $tagsResult = $this->tagModel->whereIn('id', $tagsId)->get(['id', 'tag']);
+                    if (!$tagsResult->isEmpty()) {
+                        $tagsName = $tagsResult->toArray();
+                    }
+                }
+                $item['tags_name'] = $tagsName;
+                $siteList[$item['category_id']]['items'][] = $item;
+            }
+        });
+
+        $data = [
+            'category_list' => $categoryList,
+            'sites'         => collect($siteList)->values(),
         ];
 
         return $this->response->array($data);

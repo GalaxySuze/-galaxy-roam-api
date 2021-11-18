@@ -7,6 +7,7 @@ use App\Http\Requests\Admin\AddSiteTeamRequest;
 use App\Http\Requests\Admin\AddTeamRequest;
 use App\Http\Requests\Admin\EditSiteRequest;
 use App\Http\Requests\Admin\EditTeamRequest;
+use App\Imports\SiteImport;
 use App\Models\Category;
 use App\Models\Site;
 use App\Models\Tag;
@@ -14,9 +15,17 @@ use App\Models\Team;
 use App\Transformers\SiteTransformer;
 use App\Transformers\TeamTransformer;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class SiteController extends BaseController
 {
+    public static $checkImport = [
+        'total'   => 0,
+        'success' => 0,
+        'fail'    => 0,
+        'error'   => '',
+    ];
+
     /**
      * Display a listing of the resource.
      *
@@ -98,7 +107,7 @@ class SiteController extends BaseController
         $pageSize = $request->get('pageSize');
         $result = Site::leftJoin('categories', 'categories.id', '=', 'sites.category_id')
             ->when(!empty($name), function ($query) use ($name) {
-                $query->where('categories.name', 'like', "%$name%");
+                $query->where('sites.name', 'like', "%$name%");
             })->when(!empty($categoryId), function ($query) use ($categoryId) {
                 $query->where('sites.category_id', $categoryId);
             })->when(!empty($tagsId), function ($query) use ($tagsId) {
@@ -124,5 +133,29 @@ class SiteController extends BaseController
             'tag'      => $tagData,
         ];
         return $this->response->array($result);
+    }
+
+    /**
+     * @param Request $request
+     * @return \Dingo\Api\Http\Response|void
+     */
+    public function importSiteData(Request $request)
+    {
+        $file = $request->file('file');
+        $fileExt = $file->getClientOriginalExtension();
+        if (!in_array($fileExt, ['xls', 'xlsx'])) {
+            return $this->response->errorBadRequest('只支持xls/xlsx类型文件');
+        }
+        $filesize = $file->getSize();
+        if ($filesize > 512000) {
+            return $this->response->errorBadRequest('上传文件超过500kb');
+        }
+        $newName = date('YmdHis') . mt_rand(100, 999) . '.' . $fileExt;
+        $uploadsPath = storage_path('app' . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . 'sitesExcel');
+        $savePath = $file->move($uploadsPath, $newName);
+
+        Excel::import(new SiteImport, $savePath->getPathname());
+
+        return $this->response->array(self::$checkImport);
     }
 }

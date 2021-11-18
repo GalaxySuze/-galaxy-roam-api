@@ -100,7 +100,7 @@ class TeamController extends BaseController
         $pageSize = $request->get('pageSize');
         $result = Team::leftJoin('categories', 'categories.id', '=', 'teams.category_id')
             ->when(!empty($name), function ($query) use ($name) {
-                $query->where('categories.name', 'like', "%$name%");
+                $query->where('teams.name', 'like', "%$name%");
             })->when(!empty($categoryId), function ($query) use ($categoryId) {
                 $query->where('teams.category_id', $categoryId);
             })->when(!empty($tagsId), function ($query) use ($tagsId) {

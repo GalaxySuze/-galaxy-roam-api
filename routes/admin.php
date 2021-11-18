@@ -37,6 +37,7 @@ $api->version('v1', ['middleware' => 'api.auth'], function ($api) {
         // 获取站点列表
         $api->get('site/list', [SiteController::class, 'list']);
         $api->get('site/form-init-data', [SiteController::class, 'getFormInitData']);
+        $api->post('site/import', [SiteController::class, 'importSiteData']);
 
         $api->resource('menu', MenuController::class, ['only' => ['store', 'update', 'destroy']]);
         $api->resource('user', UserController::class, ['only' => ['store', 'update', 'destroy']]);
