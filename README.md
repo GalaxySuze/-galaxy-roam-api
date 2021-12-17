@@ -9,11 +9,11 @@ Vue2 + ElementUI + Laravel7.3
 - 初始账号: admin@admin.com/123123
 - 数据库为根目录下的 galaxy_roam.sql 文件
 
-![yuque](https://github.com/GalaxySuze/galaxy-roam-api/raw/master/yuque01.jpg)
+![yuque](https://github.com/GalaxySuze/galaxy-roam-api/raw/master/yuque01.png)
 
-![demo](https://github.com/GalaxySuze/galaxy-roam-api/raw/master/demo1.jpg)
+![demo](https://github.com/GalaxySuze/galaxy-roam-api/raw/master/demo1.png)
 
-![demo](https://github.com/GalaxySuze/galaxy-roam-api/raw/master/demo2.jpg)
+![demo](https://github.com/GalaxySuze/galaxy-roam-api/raw/master/demo2.png)
 
-![demo](https://github.com/GalaxySuze/galaxy-roam-api/raw/master/demo3.jpg)
+![demo](https://github.com/GalaxySuze/galaxy-roam-api/raw/master/demo3.png)
 
